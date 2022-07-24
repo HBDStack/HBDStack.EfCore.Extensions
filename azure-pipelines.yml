@@ -1,0 +1,94 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+- master
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+- name: NUGET_PACKAGES
+  value: $(Pipeline.Workspace)/.nuget/packages
+- name: BuildParameters.RestoreBuildProjects
+  value: '**/*.csproj'
+- name: BuildParameters.TestProjects
+  value: '**/*[Tt]ests/*.csproj'
+- name: BuildConfiguration
+  value: Release
+
+name: $(date:yyyyMMdd)$(rev:.r)
+
+jobs:
+- job: Phase_1
+  displayName: Agent job 1
+  cancelTimeoutInMinutes: 1
+  steps:
+  - checkout: self
+    persistCredentials: True
+  
+  - task: Cache@2
+    inputs:
+      key: 'nuget | "$(Agent.OS)" | **/*.csproj,!**/bin/**'
+      restoreKeys: nuget | "$(Agent.OS)"
+      path: $(NUGET_PACKAGES)
+    displayName: Cache NuGet packages
+
+  - task: gitversion/setup@0
+    inputs:
+      versionSpec: '5.x'
+      includePrerelease: true
+  - task: gitversion/execute@0
+
+  - task: SetVariable@0
+    inputs:
+      variableName: 'Package.Version'
+      value: '$(GitVersion.NuGetVersionV2)$(GitVersion.BuildMetaData)'
+
+  - task: printAllVariables@1
+
+  - task: UseDotNet@2
+    inputs:
+      packageType: 'sdk'
+      version: '6.x'
+      includePreviewVersions: true
+    
+  - task: DotNetCoreCLI@2
+    displayName: Restore
+    inputs:
+      command: restore
+      projects: $(BuildParameters.RestoreBuildProjects)
+      feedRestore: 7767cad8-a04a-4537-87e2-58f2418b26b3
+  - task: DotNetCoreCLI@2
+    displayName: Build
+    inputs:
+      projects: $(BuildParameters.RestoreBuildProjects)
+      arguments: -c $(BuildConfiguration) --no-restore
+
+  - task: DotNetCoreCLI@2
+    displayName: Test
+    continueOnError: True
+    inputs:
+      command: 'test'
+      projects: '$(BuildParameters.TestProjects)'
+      arguments: '--configuration $(BuildConfiguration) --collect "Code coverage"'
+
+  # - task: CopyFiles@2
+  #   displayName: 'Copy All Nupkg Files to: $(Build.ArtifactStagingDirectory)'
+  #   inputs:
+  #     Contents: '**/$(BuildConfiguration)/**/*.nupkg'
+  #     TargetFolder: $(Build.ArtifactStagingDirectory)
+  
+  - task: DotNetCoreCLI@2
+    displayName: Pack Nuget
+    inputs:
+      command: 'pack'
+      packagesToPack: '**/HBD.*.csproj;!**/*Tests.csproj'
+      versioningScheme: 'byEnvVar'
+      versionEnvVar: 'Package.Version'
+      
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: drop'
+

@@ -1,0 +1,47 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <Copyright>@drunkcoding.net 2025</Copyright>
+        <Description>The extensions for EntityFrameworkCore which automate the ModelBuilder registration for Relational Database
+            - Auto entity regustration
+            - Event sourcing for Entities and AggregateRoots
+            - Repository pattern
+            - Entity validation
+        </Description>
+        <PackageLicense>https://opensource.org/licenses/MIT</PackageLicense>
+        <RepositoryUrl>https://github.com/HBDStack/HBDStack.EfCore.Extensions</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <Owners>Duy Hoang</Owners>
+        <PackageTags>EntityFrameworkCore, EfCore, Hooks, Events</PackageTags>
+        <LangVersion>default</LangVersion>
+        <TargetFramework>net6.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <PackageVersion />
+        <PackageProjectUrl>https://github.com/HBDStack/HBDStack.EfCore.Extensions</PackageProjectUrl>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
+        <PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Abstractions" Version="6.0.7" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <InternalsVisibleTo Include="HBDStack.EfCore.Extensions.Tests" />
+    </ItemGroup>
+    
+    <ItemGroup>
+      <Compile Remove="Specification\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Remove="Specification\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="Specification\**" />
+    </ItemGroup>
+    
+</Project>
