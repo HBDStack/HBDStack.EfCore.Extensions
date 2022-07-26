@@ -2,8 +2,8 @@
 using DDD4Tests;
 using DDD4Tests.Domains;
 using FluentAssertions;
-using HBD.EfCore.Repos;
 using HBDStack.EfCore.Repos;
+using HBDStack.EfCore.Repos.Abstractions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;

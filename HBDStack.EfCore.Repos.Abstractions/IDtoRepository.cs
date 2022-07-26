@@ -1,9 +1,8 @@
 ﻿using System.Linq.Expressions;
 using HBDStack.EfCore.Abstractions.Pageable;
 using HBDStack.EfCore.Abstractions.QueryBuilders;
-// ReSharper disable CheckNamespace
 
-namespace HBD.EfCore.Repos;
+namespace HBDStack.EfCore.Repos.Abstractions;
 
 public interface IDtoRepository<TEntity> where TEntity : class
 {

@@ -1,9 +1,7 @@
-// ReSharper disable CheckNamespace
-
 using HBDStack.EfCore.Abstractions.Entities;
 using Microsoft.EntityFrameworkCore.Storage;
 
-namespace HBD.EfCore.Repos.Basic;
+namespace HBDStack.EfCore.Repos.Abstractions.Basic;
 
 public interface IBasicRepository : IBasicReadOnlyRepository
 {

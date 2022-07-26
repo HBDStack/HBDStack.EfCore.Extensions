@@ -1,9 +1,7 @@
-// ReSharper disable CheckNamespace
-
 using System.Linq.Expressions;
 using HBDStack.EfCore.Abstractions.QueryBuilders;
 
-namespace HBD.EfCore.Repos.Basic;
+namespace HBDStack.EfCore.Repos.Abstractions.Basic;
 
 public interface IBasicReadOnlyRepository
 {

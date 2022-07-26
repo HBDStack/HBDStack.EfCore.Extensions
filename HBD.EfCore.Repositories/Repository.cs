@@ -1,6 +1,6 @@
-﻿using HBD.EfCore.Repos;
-using HBD.EfCore.Repos.Basic;
-using HBDStack.EfCore.Abstractions.Entities;
+﻿using HBDStack.EfCore.Abstractions.Entities;
+using HBDStack.EfCore.Repos.Abstractions;
+using HBDStack.EfCore.Repos.Abstractions.Basic;
 using HBDStack.EfCore.Repos.Basic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;

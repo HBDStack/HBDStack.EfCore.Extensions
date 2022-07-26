@@ -1,9 +1,7 @@
 ﻿using HBDStack.EfCore.Abstractions.Entities;
 using Microsoft.EntityFrameworkCore.Storage;
 
-// ReSharper disable CheckNamespace
-
-namespace HBD.EfCore.Repos;
+namespace HBDStack.EfCore.Repos.Abstractions;
 
 public interface IRepository<TEntity> : IReadOnlyRepository<TEntity> where TEntity : class
 {

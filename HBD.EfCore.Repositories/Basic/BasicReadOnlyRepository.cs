@@ -1,6 +1,6 @@
 ﻿using System.Linq.Expressions;
-using HBD.EfCore.Repos.Basic;
 using HBDStack.EfCore.Abstractions.QueryBuilders;
+using HBDStack.EfCore.Repos.Abstractions.Basic;
 using Microsoft.EntityFrameworkCore;
 
 // ReSharper disable MemberCanBePrivate.Global

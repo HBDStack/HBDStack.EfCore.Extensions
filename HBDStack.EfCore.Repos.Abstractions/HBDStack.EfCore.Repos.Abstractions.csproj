@@ -20,6 +20,7 @@
         <Nullable>enable</Nullable>
         <PackageVersion />
         <PackageProjectUrl>https://github.com/HBDStack/HBDStack.EfCore.Extensions</PackageProjectUrl>
+        <Authors>Duy Hoang</Authors>
     </PropertyGroup>
 
     <ItemGroup>

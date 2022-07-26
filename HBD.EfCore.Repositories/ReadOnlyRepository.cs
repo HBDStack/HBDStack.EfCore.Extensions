@@ -1,7 +1,7 @@
 ﻿using System.Linq.Expressions;
-using HBD.EfCore.Repos;
-using HBD.EfCore.Repos.Basic;
 using HBDStack.EfCore.Abstractions.QueryBuilders;
+using HBDStack.EfCore.Repos.Abstractions;
+using HBDStack.EfCore.Repos.Abstractions.Basic;
 
 // ReSharper disable MemberCanBeProtected.Global
 // ReSharper disable MemberCanBePrivate.Global

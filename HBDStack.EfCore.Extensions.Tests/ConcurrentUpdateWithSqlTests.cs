@@ -2,7 +2,7 @@ using System;
 using System.Threading.Tasks;
 using DataLayer;
 using FluentAssertions;
-using HBD.EfCore.Repos.Basic;
+using HBDStack.EfCore.Repos.Abstractions.Basic;
 using HBDStack.EfCore.Repos.Basic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
