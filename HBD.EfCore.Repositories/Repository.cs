@@ -16,6 +16,8 @@ public class Repository<TEntity> : ReadOnlyRepository<TEntity>, IRepository<TEnt
 
     protected internal DbContext? DbContext => (_repository as BasicRepository)?.DbContext;
 
+    public void Add(TEntity entity) => _repository.Add(entity);
+    
     public ValueTask AddAsync(TEntity entity, CancellationToken cancellationToken = default)
         => _repository.AddAsync(entity, cancellationToken);
 

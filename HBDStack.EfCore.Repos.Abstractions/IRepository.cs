@@ -5,6 +5,7 @@ namespace HBDStack.EfCore.Repos.Abstractions;
 
 public interface IRepository<TEntity> : IReadOnlyRepository<TEntity> where TEntity : class
 {
+    void Add(TEntity entity);
     ValueTask AddAsync(TEntity entity, CancellationToken cancellationToken = default);
 
     Task<TEntity?> DeleteByIdAsync(params object[] id);

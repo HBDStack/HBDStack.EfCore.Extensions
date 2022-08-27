@@ -5,6 +5,7 @@ namespace HBDStack.EfCore.Repos.Abstractions.Basic;
 
 public interface IBasicRepository : IBasicReadOnlyRepository
 {
+    void Add<TEntity>(TEntity entity) where TEntity : class;
     ValueTask AddAsync<TEntity>(TEntity entity, CancellationToken cancellationToken = default) where TEntity : class;
 
     void Update<TEntity>(TEntity entity) where TEntity : class;

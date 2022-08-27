@@ -13,6 +13,10 @@ public class BasicRepository : BasicReadOnlyRepository, IBasicRepository
 
     protected internal DbContext DbContext { get; }
 
+    public void Add<TEntity>(TEntity entity)
+        where TEntity : class
+        =>  DbContext.Add(entity);
+    
     public async ValueTask AddAsync<TEntity>(TEntity entity, CancellationToken cancellationToken = default)
         where TEntity : class
         => await DbContext.AddAsync(entity, cancellationToken).ConfigureAwait(false);
