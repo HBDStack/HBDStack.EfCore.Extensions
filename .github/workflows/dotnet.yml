@@ -15,3 +15,11 @@ jobs:
     secrets:
       PACKAGE_TOKEN: ${{ secrets.PACKAGE_TOKEN }}
       NUGET_PACKAGE_TOKEN: ${{ secrets.NUGET_PACKAGE_TOKEN }}
+      
+  dotnet_sonar_scan:
+    uses: HBDStack/ShareWorkflows/.github/workflows/sonar-build.yml@main
+    with:
+      Project_Path: 'HBDStack.EfCore.Extensions.sln'
+      Project_Name: 'HBDStack_HBDStack.EfCore.Extensions'
+    secrets:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
