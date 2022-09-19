@@ -23,7 +23,7 @@ public abstract class Entity<TKey> : IEntity<TKey>, IConcurrencyEntity
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     //[IgnoreFromUpdate]
     // ReSharper disable once AutoPropertyCanBeMadeGetOnly.Local
-    public virtual TKey Id { get; private set; }
+    public virtual TKey Id { get; private set; } = default!;
 
     /// <summary>
     ///     The RowVersion which using by EF
