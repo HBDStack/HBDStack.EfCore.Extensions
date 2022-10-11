@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.Runtime.CompilerServices;
 using HBDStack.EfCore.Abstractions.Entities;
 
 namespace DataLayer;

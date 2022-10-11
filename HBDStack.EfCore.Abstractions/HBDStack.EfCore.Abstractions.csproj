@@ -31,17 +31,4 @@
     <ItemGroup>
         <InternalsVisibleTo Include="HBDStack.EfCore.Extensions.Tests" />
     </ItemGroup>
-    
-    <ItemGroup>
-      <Compile Remove="Specification\**" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <EmbeddedResource Remove="Specification\**" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <None Remove="Specification\**" />
-    </ItemGroup>
-    
 </Project>

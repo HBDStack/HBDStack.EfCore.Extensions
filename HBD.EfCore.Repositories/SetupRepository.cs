@@ -1,5 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-using HBDStack.EfCore.Repos;
+﻿using HBDStack.EfCore.Repos;
 using HBDStack.EfCore.Repos.Abstractions;
 using HBDStack.EfCore.Repos.Abstractions.Basic;
 using HBDStack.EfCore.Repos.Basic;

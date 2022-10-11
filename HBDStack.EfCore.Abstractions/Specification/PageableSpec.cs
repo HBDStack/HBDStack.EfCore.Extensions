@@ -1,12 +1,10 @@
 ﻿using System.Linq.Expressions;
-using HBD.EfCore.Abstractions.QueryBuilders;
+using HBDStack.EfCore.Abstractions.QueryBuilders;
 
 namespace HBD.EfCore.Abstractions.Specification;
 
 public class PageableSpec<T> : Spec<T>
 {
-    #region Constructors
-
     public PageableSpec(int pageIndex, int pageSize, Expression<Func<T, object>> orderBy, OrderingDirection direction = OrderingDirection.Asc, Spec<T>? spec = null)
     {
         PageIndex = pageIndex;
@@ -15,10 +13,7 @@ public class PageableSpec<T> : Spec<T>
         OrderDirection = direction;
         InternalSpec = spec;
     }
-
-    #endregion Constructors
     
-
     public Spec<T>? InternalSpec { get; }
     public Expression<Func<T, object>> OrderBy { get; }
     public OrderingDirection OrderDirection { get; }
