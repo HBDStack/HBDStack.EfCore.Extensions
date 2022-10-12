@@ -24,7 +24,7 @@ internal class EntityMappingExtension : IDbContextOptionsExtension, IEntityMappi
         //Add custom services
         _extraServiceProvider?.Invoke(services);
 
-        //Add EntityMappingService, it should be Singleton
+        //Add EntityMappingService, it should be
         services.AddSingleton(new EntityMappingService(this));
 
         //Replace the IModelCustomizer with ExtraModelCustomizer. This only available for Relational Db.
@@ -32,9 +32,9 @@ internal class EntityMappingExtension : IDbContextOptionsExtension, IEntityMappi
 
         if (originalDescriptor == null)
         {
-            //it should be Singleton
-            services.AddSingleton<ModelCustomizer, RelationalModelCustomizer>();
-            services.Add(new ServiceDescriptor(typeof(IModelCustomizer), typeof(ExtraModelCustomizer), ServiceLifetime.Singleton));
+            //it should be
+            services.AddScoped<ModelCustomizer, RelationalModelCustomizer>();
+            services.Add(new ServiceDescriptor(typeof(IModelCustomizer), typeof(ExtraModelCustomizer), ServiceLifetime.Scoped));
         }
         else
         {
@@ -45,10 +45,10 @@ internal class EntityMappingExtension : IDbContextOptionsExtension, IEntityMappi
                 originalDescriptor.Lifetime));
         }
 
-        //Register Global Query Filter from registration, it should be Singleton
+        //Register Global Query Filter from registration, it should be
         foreach (var g in SetupEfCore.GlobalQueryFilters)
             services.Add(
-                new ServiceDescriptor(typeof(IGlobalModelBuilderRegister), g, ServiceLifetime.Singleton));
+                new ServiceDescriptor(typeof(IGlobalModelBuilderRegister), g, ServiceLifetime.Scoped));
     }
 
     /// <summary>

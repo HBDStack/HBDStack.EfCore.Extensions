@@ -63,10 +63,10 @@ public static class SetupEvents
             throw new InvalidOperationException($"The {nameof(IEventPublisher)} already added.");
 
         return services
-            //.AddSingleton(typeof(IAfterSaveEventHandler<>), typeof(InternalEventPublisherHandler<>))
-            .AddSingleton(typeof(IAfterSaveEventHandlerAsync<>), typeof(InternalEventPublisherHandler<>))
+            //.AddScoped(typeof(IAfterSaveEventHandler<>), typeof(InternalEventPublisherHandler<>))
+            .AddScoped(typeof(IAfterSaveEventHandlerAsync<>), typeof(InternalEventPublisherHandler<>))
             //.AddScoped<TPublisherImplementation>()
-            .AddSingleton<IEventPublisher, TPublisherImplementation>()
+            .AddScoped<IEventPublisher, TPublisherImplementation>()
             .AddEventRunner();
     }
 }
