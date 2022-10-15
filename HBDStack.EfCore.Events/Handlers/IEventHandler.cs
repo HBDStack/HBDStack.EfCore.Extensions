@@ -1,5 +1,5 @@
 using HBDStack.EfCore.Abstractions.Events;
-using StatusGeneric;
+using HBDStack.StatusGeneric;
 
 namespace HBDStack.EfCore.Events.Handlers;
 
@@ -28,6 +28,5 @@ namespace HBDStack.EfCore.Events.Handlers;
 /// </typeparam>
 public interface IEventHandlerAsync<in TEvent> where TEvent : IEventItem
 {
-    ValueTask<IStatusGeneric> HandleAsync(IEventEntity callingEntity, TEvent domainEvent,
-        CancellationToken cancellationToken = default);
+    ValueTask<IStatusGeneric> HandleAsync(IEventEntity callingEntity, TEvent domainEvent, CancellationToken cancellationToken = default);
 }

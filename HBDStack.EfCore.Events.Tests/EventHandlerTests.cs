@@ -14,7 +14,7 @@ public class EventHandlerTests
     public void Scan_Types_FromAssemblies()
     {
         var provider = new ServiceCollection()
-            .ScanEventHandlers(new[]{typeof(DddContext).Assembly});
+            .AddEvents(new[]{typeof(DddContext).Assembly});
 
         provider.Count.Should().BeGreaterOrEqualTo(1);
         provider.Any(p => p.ServiceType == typeof(IBeforeSaveEventHandlerAsync<EntityAddedEvent>)).Should().BeTrue();

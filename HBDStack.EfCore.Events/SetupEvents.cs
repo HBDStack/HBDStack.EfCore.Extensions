@@ -3,6 +3,7 @@ using System.Reflection;
 using HBDStack.EfCore.Events;
 using HBDStack.EfCore.Events.Handlers;
 using HBDStack.EfCore.Events.Internals;
+using HBDStack.EfCore.Events.MiddleWare;
 using HBDStack.EfCore.Hooks;
 using HBDStack.Framework.Extensions;
 
@@ -16,10 +17,9 @@ public static class SetupEvents
     ///   Add Handlers from Assemblies with ServiceLifetime
     /// </summary>
     /// <param name="services"></param>
-    /// <param name="fromAssemblies"></param>
+    /// <param name="fromAssemblies">Scan the handler from assemblies</param>
     /// <returns></returns>
-    public static IServiceCollection ScanEventHandlers(this IServiceCollection services,
-        Assembly[] fromAssemblies)
+    public static IServiceCollection AddEvents(this IServiceCollection services, Assembly[] fromAssemblies)
     {
         var types = fromAssemblies.Extract().Class().NotAbstract().NotGeneric()
             .IsInstanceOfAny(
@@ -51,13 +51,28 @@ public static class SetupEvents
     }
 
     /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="services"></param>
+    /// <typeparam name="TImplementation"></typeparam>
+    /// <returns></returns>
+    /// <exception cref="InvalidOperationException"></exception>
+    public static IServiceCollection AddEventMapper<TImplementation>(this IServiceCollection services) where TImplementation : class, IEventMapper
+    {
+        if (services.Any(s => s.ServiceType == typeof(IEventMapper)))
+            throw new InvalidOperationException($"The {nameof(IEventMapper)} already added.");
+
+        return services.AddScoped<IEventMapper, TImplementation>();
+    }
+    
+    /// <summary>
     ///     Add Event Publisher
     /// </summary>
-    /// <typeparam name="TPublisherImplementation">The implementation of <see cref="IEventPublisher" /></typeparam>
+    /// <typeparam name="TImplementation">The implementation of <see cref="IEventPublisher" /></typeparam>
     /// <param name="services"></param>
     /// <returns></returns>
-    public static IServiceCollection AddEventPublisher<TPublisherImplementation>(this IServiceCollection services)
-        where TPublisherImplementation : class, IEventPublisher
+    public static IServiceCollection AddEventPublisher<TImplementation>(this IServiceCollection services)
+        where TImplementation : class, IEventPublisher
     {
         if (services.Any(s => s.ServiceType == typeof(IEventPublisher)))
             throw new InvalidOperationException($"The {nameof(IEventPublisher)} already added.");
@@ -66,7 +81,7 @@ public static class SetupEvents
             //.AddScoped(typeof(IAfterSaveEventHandler<>), typeof(InternalEventPublisherHandler<>))
             .AddScoped(typeof(IAfterSaveEventHandlerAsync<>), typeof(InternalEventPublisherHandler<>))
             //.AddScoped<TPublisherImplementation>()
-            .AddScoped<IEventPublisher, TPublisherImplementation>()
+            .AddScoped<IEventPublisher, TImplementation>()
             .AddEventRunner();
     }
 }

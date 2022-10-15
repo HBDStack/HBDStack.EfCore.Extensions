@@ -1,4 +1,4 @@
-using StatusGeneric;
+using HBDStack.StatusGeneric;
 
 namespace HBDStack.EfCore.Events;
 

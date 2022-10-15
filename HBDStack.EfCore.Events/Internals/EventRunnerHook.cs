@@ -1,11 +1,12 @@
 using System.Collections.Immutable;
+using System.Data;
 using System.Reflection;
-using AutoMapper;
 using HBDStack.EfCore.Abstractions.Events;
-using HBDStack.EfCore.Hooks;
 using HBDStack.EfCore.Events.Attributes;
+using HBDStack.EfCore.Events.MiddleWare;
+using HBDStack.EfCore.Hooks;
+using HBDStack.StatusGeneric;
 using Microsoft.EntityFrameworkCore;
-using StatusGeneric;
 
 namespace HBDStack.EfCore.Events.Internals;
 
@@ -14,14 +15,14 @@ internal sealed class EventRunnerHook : /*IHook,*/ IHookAsync
     //private static readonly Type InternalRunner = typeof(EventHandlerRunner<>);
     private static readonly Type InternalAsyncRunner = typeof(EventHandlerRunnerAsync<>);
     private readonly EventHandlerFinder _eventHandlerFinder;
-    private readonly IMapper _autoMapper;
+    private readonly IEventMapper? _autoMapper;
     //private ImmutableList<EntityEventItem>? _currentEvents;
     private ImmutableList<EntityEventItem>? _currentAsyncEvents;
 
-    public EventRunnerHook(EventHandlerFinder eventHandlerFinder, IMapper autoMapper)
+    public EventRunnerHook(EventHandlerFinder eventHandlerFinder, IEnumerable<IEventMapper> autoMappers)
     {
         _eventHandlerFinder = eventHandlerFinder;
-        _autoMapper = autoMapper;
+        _autoMapper = autoMappers.FirstOrDefault();
     }
 
     /// <summary>
@@ -95,8 +96,9 @@ internal sealed class EventRunnerHook : /*IHook,*/ IHookAsync
             .Select(e =>
             {
                 var events = new List<IEventItem?>();
-                var t = (IEventEntity)e.Entity;
-                var eventsAndTypes = t.GetEventsAndClear();
+                var finallyEventTypes = new List<Type>();
+                var entity = (IEventEntity)e.Entity;
+                var eventsAndTypes = entity.GetEventsAndClear();
 
                 if (eventsAndTypes.events != null)
                 {
@@ -105,24 +107,27 @@ internal sealed class EventRunnerHook : /*IHook,*/ IHookAsync
                 }
 
                 if (eventsAndTypes.eventTypes != null)
-                {
-                    //Collect events from Type
-                    events.AddRange(eventsAndTypes.eventTypes.Select(type => (IEventItem)_autoMapper.Map(t, e.Entry.Metadata.ClrType, type)));
-                }
+                    finallyEventTypes.AddRange(eventsAndTypes.eventTypes);
 
                 //Collect Auto events from Attribute.
                 var autoEventAtt = e.Entry.Metadata.ClrType.GetCustomAttribute<AutoEventsAttribute>();
 
                 if(autoEventAtt?.CreatedEventType != null && e.OriginalState == EntityState.Added)
-                    events.Add((IEventItem)_autoMapper.Map(t,e.Entry.Metadata.ClrType,autoEventAtt.CreatedEventType));
+                    finallyEventTypes.Add(autoEventAtt.CreatedEventType);
                 
                 if(autoEventAtt?.UpdatedEventType != null && e.OriginalState == EntityState.Modified)
-                    events.Add((IEventItem)_autoMapper.Map(t,e.Entry.Metadata.ClrType,autoEventAtt.UpdatedEventType));
+                    finallyEventTypes.Add(autoEventAtt.UpdatedEventType);
 
                 if(autoEventAtt?.DeletedEventType != null && e.OriginalState == EntityState.Deleted)
-                    events.Add((IEventItem)_autoMapper.Map(t,e.Entry.Metadata.ClrType,autoEventAtt.DeletedEventType));
-                
-                return new EntityEventItem(t, events.Where(i=>i is not null).Distinct().ToArray()!);
+                    finallyEventTypes.Add(autoEventAtt.DeletedEventType);
+
+                if (finallyEventTypes.Any())
+                {
+                    if (_autoMapper == null) throw new NoNullAllowedException($"The {nameof(IEventMapper)} is not provided.");
+                    events.AddRange(finallyEventTypes.Distinct().Select(d=>(IEventItem)_autoMapper.Map(entity, e.Entry.Metadata.ClrType, d)));
+                }
+
+                return new EntityEventItem(entity, events.Where(i=>i is not null).Distinct().ToArray()!);
             })
             .Where(e => e.Events.Count > 0)
             .ToImmutableList();
@@ -150,8 +155,7 @@ internal sealed class EventRunnerHook : /*IHook,*/ IHookAsync
     //     return new StatusGenericHandler();
     // }
 
-    private async ValueTask<IStatusGeneric> RunEventsAsync(HandlerTypes type, ImmutableList<EntityEventItem>? events,
-        CancellationToken cancellationToken = default)
+    private async ValueTask<IStatusGeneric> RunEventsAsync(HandlerTypes type, ImmutableList<EntityEventItem>? events, CancellationToken cancellationToken = default)
     {
         if (events == null || events.IsEmpty) return new StatusGenericHandler();
         var foundHandlers = @events.SelectMany(e => _eventHandlerFinder.Find(type, e));

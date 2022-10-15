@@ -13,10 +13,7 @@ public class ReadOnlyRepositoryTests : IClassFixture<RepositoryFixture>
 {
     private readonly RepositoryFixture _fixture;
 
-    public ReadOnlyRepositoryTests(RepositoryFixture fixture)
-    {
-        _fixture = fixture;
-    }
+    public ReadOnlyRepositoryTests(RepositoryFixture fixture) => _fixture = fixture;
 
     #region Methods
 

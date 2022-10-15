@@ -9,11 +9,11 @@ using Xunit;
 
 namespace HBDStack.EfCore.Events.Tests.EventPublisherTests;
 
-public class AutoEventTests : IClassFixture<EvenPublisherFixture>
+public class AutoEventWithAutoMapperTests : IClassFixture<EvenPublisherFixture>
 {
     private readonly EvenPublisherFixture _provider;
 
-    public AutoEventTests(EvenPublisherFixture provider) => _provider = provider;
+    public AutoEventWithAutoMapperTests(EvenPublisherFixture provider) => _provider = provider;
 
     [Fact]
     public async Task CreatedTest()
@@ -78,25 +78,6 @@ public class AutoEventTests : IClassFixture<EvenPublisherFixture>
         await db.SaveChangesAsync().ConfigureAwait(false);
 
         TestEventPublisher.Events.Any(e=>e is EntityUpdatedEvent).Should().BeTrue();
-    }
-
-    [Fact]
-    public async Task DeletedTest()
-    {
-        var db = _provider.Provider.GetRequiredService<DddContext>();
-        var p = new Root("P1");
-
-        //Added 
-        db.Add(p);
-       await db.SaveChangesAsync().ConfigureAwait(false);
-       TestEventPublisher.Events.Clear();
-
-        //Delete
-        db.Set<Root>().Remove(p);
-       await db.SaveChangesAsync().ConfigureAwait(false);
-
-       await Task.Delay(10);
-       TestEventPublisher.Events.Any(e=>e is EntityDeletedEvent).Should().BeTrue();
     }
 
     [Fact]

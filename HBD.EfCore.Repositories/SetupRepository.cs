@@ -28,7 +28,8 @@ public static class SetupRepository
             .AddScoped<IBasicRepository, BasicRepository>()
             .AddScoped(typeof(IReadOnlyRepository<>), typeof(ReadOnlyRepository<>))
             .AddScoped(typeof(IRepository<>), typeof(Repository<>))
-            .AddScoped(typeof(IDtoRepository<>), typeof(DtoRepository<>));
+            //.AddScoped(typeof(IDtoRepository<>), typeof(DtoRepository<>))
+            ;
     }
 
     /// <summary>

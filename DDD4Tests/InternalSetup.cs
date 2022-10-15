@@ -96,13 +96,15 @@ public static class InternalSetup
     {
         assembliesToScans ??= new[] {typeof(TContext).Assembly};
 
-        if (enableAutoScanEventHandler) service.ScanEventHandlers(assembliesToScans);
+        if (enableAutoScanEventHandler)
+            service.AddEvents(assembliesToScans);
 
         if (enableAutoMapper)
         {
             //Auto Mapper
             autoMapperConfig ??= cf => cf.ShouldUseConstructor = f => f.IsPublic;
             service.AddAutoMapper(autoMapperConfig, assembliesToScans);
+            service.AddEventAutoMapper();
         }
 
         return service.AddBoundedContext<TContext>(contextBuilder,

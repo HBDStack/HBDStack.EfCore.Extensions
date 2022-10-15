@@ -25,7 +25,7 @@ public class AfterEventRunnerTest : IClassFixture<AfterEventRunnerFixture>
         root.AddEntity("Duy");
         await _provider.Context.SaveChangesAsync().ConfigureAwait(false);
             
-        AfterEventTestHandler.AsyncCalled.Should().Be(1);
+        AfterEventTestHandler.AsyncCalled.Should().BeGreaterOrEqualTo(1);
     }
 
     [Fact]

@@ -16,6 +16,7 @@ public class EvenPublisherFixture : IDisposable
             .AddLogging()
             .AddAutoMapper(b=>b.AddMaps(typeof(DddContext).Assembly))
             .AddEventPublisher<TestEventPublisher>()
+            .AddEventAutoMapper()
             .AddDbContextWithHook<DddContext>(builder => builder.UseSqliteMemory().UseAutoConfigModel())
             .BuildServiceProvider();
 

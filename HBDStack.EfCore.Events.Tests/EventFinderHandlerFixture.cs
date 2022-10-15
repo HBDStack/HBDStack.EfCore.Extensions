@@ -9,8 +9,7 @@ public class EventFinderHandlerFixture : IDisposable
     public EventFinderHandlerFixture()
     {
         Provider = new ServiceCollection()
-            .AddEventRunner()
-            .ScanEventHandlers(new[] {typeof(DddContext).Assembly})
+            .AddEvents(new[] {typeof(DddContext).Assembly})
             .AddLogging()
             .BuildServiceProvider();
     }

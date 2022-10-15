@@ -2,12 +2,7 @@
 
     <PropertyGroup>
         <Copyright>@drunkcoding.net 2025</Copyright>
-        <Description>The extensions for EntityFrameworkCore which automate the ModelBuilder registration for Relational Database
-            - Auto entity regustration
-            - Event sourcing for Entities and AggregateRoots
-            - Repository pattern
-            - Entity validation
-        </Description>
+        <Description>The Mapster provider for HBDStack.EfCore.Events.IEventMapper</Description>
         <PackageLicense>https://opensource.org/licenses/MIT</PackageLicense>
         <RepositoryUrl>https://github.com/HBDStack/HBDStack.EfCore.Extensions</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
@@ -23,8 +18,11 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.10" />
-      <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="6.0.10" />
+      <ProjectReference Include="..\HBDStack.EfCore.Events\HBDStack.EfCore.Events.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Mapster" Version="7.3.0" />
     </ItemGroup>
 
 </Project>

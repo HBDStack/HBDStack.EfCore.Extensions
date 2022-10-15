@@ -2,7 +2,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using HBDStack.EfCore.Abstractions.Events;
 using HBDStack.EfCore.Events.Handlers;
-using StatusGeneric;
+using HBDStack.StatusGeneric;
 
 namespace DDD4Tests.Events;
 

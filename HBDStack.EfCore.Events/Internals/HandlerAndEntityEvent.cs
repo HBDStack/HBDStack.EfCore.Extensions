@@ -20,5 +20,5 @@ internal class HandlerAndEntityEvent
     /// <summary>
     ///     Check whether HandlerTypes is async or not.
     /// </summary>
-    public bool IsAsyncType => Type == HandlerTypes.AfterAsync || Type == HandlerTypes.BeforeAsync;
+    public bool IsAsyncType => Type is HandlerTypes.AfterAsync or HandlerTypes.BeforeAsync;
 }
