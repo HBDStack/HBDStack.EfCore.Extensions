@@ -3,6 +3,7 @@ using DDD4Tests;
 using DDD4Tests.Domains;
 using DDD4Tests.Events;
 using HBDStack.EfCore.Hooks;
+using HBDStack.ObjectMapper.AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -14,9 +15,8 @@ public class EvenPublisherFixture : IDisposable
     {
         Provider = new ServiceCollection()
             .AddLogging()
-            .AddAutoMapper(b=>b.AddMaps(typeof(DddContext).Assembly))
             .AddEventPublisher<TestEventPublisher>()
-            .AddEventAutoMapper()
+            .AddAutoObjectMapper(profileAssemblies: typeof(DddContext).Assembly)
             .AddDbContextWithHook<DddContext>(builder => builder.UseSqliteMemory().UseAutoConfigModel())
             .BuildServiceProvider();
 

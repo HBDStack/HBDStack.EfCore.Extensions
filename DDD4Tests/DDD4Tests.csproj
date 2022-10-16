@@ -10,7 +10,6 @@
     <ItemGroup>
         <ProjectReference Include="..\HBDStack.EfCore.Abstractions\HBDStack.EfCore.Abstractions.csproj" />
         <ProjectReference Include="..\HBDStack.EfCore.DataAuthorization\HBDStack.EfCore.DataAuthorization.csproj" />
-        <ProjectReference Include="..\HBDStack.EfCore.Events.AutoMapper\HBDStack.EfCore.Events.AutoMapper.csproj" />
         <ProjectReference Include="..\HBDStack.EfCore.Events\HBDStack.EfCore.Events.csproj" />
     </ItemGroup>
     <ItemGroup>
@@ -18,7 +17,7 @@
         <InternalsVisibleTo Include="HBD.EfCore.Infra.Tests" />
     </ItemGroup>
     <ItemGroup>
-        <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.0" />
+      <PackageReference Include="HBDStack.ObjectMapper.AutoMapper" Version="1.0.2" />
     </ItemGroup>
 
 </Project>

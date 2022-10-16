@@ -3,7 +3,6 @@ using System.Reflection;
 using HBDStack.EfCore.Events;
 using HBDStack.EfCore.Events.Handlers;
 using HBDStack.EfCore.Events.Internals;
-using HBDStack.EfCore.Events.MiddleWare;
 using HBDStack.EfCore.Hooks;
 using HBDStack.Framework.Extensions;
 
@@ -48,21 +47,6 @@ public static class SetupEvents
         return services
             .AddHook<EventRunnerHook>()
             .Add<EventHandlerFinder, EventHandlerFinder>();
-    }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="services"></param>
-    /// <typeparam name="TImplementation"></typeparam>
-    /// <returns></returns>
-    /// <exception cref="InvalidOperationException"></exception>
-    public static IServiceCollection AddEventMapper<TImplementation>(this IServiceCollection services) where TImplementation : class, IEventMapper
-    {
-        if (services.Any(s => s.ServiceType == typeof(IEventMapper)))
-            throw new InvalidOperationException($"The {nameof(IEventMapper)} already added.");
-
-        return services.AddScoped<IEventMapper, TImplementation>();
     }
     
     /// <summary>

@@ -3,8 +3,8 @@ using System.Data;
 using System.Reflection;
 using HBDStack.EfCore.Abstractions.Events;
 using HBDStack.EfCore.Events.Attributes;
-using HBDStack.EfCore.Events.MiddleWare;
 using HBDStack.EfCore.Hooks;
+using HBDStack.ObjectMapper.Abstraction;
 using HBDStack.StatusGeneric;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,11 +15,11 @@ internal sealed class EventRunnerHook : /*IHook,*/ IHookAsync
     //private static readonly Type InternalRunner = typeof(EventHandlerRunner<>);
     private static readonly Type InternalAsyncRunner = typeof(EventHandlerRunnerAsync<>);
     private readonly EventHandlerFinder _eventHandlerFinder;
-    private readonly IEventMapper? _autoMapper;
+    private readonly IObjectMapper? _autoMapper;
     //private ImmutableList<EntityEventItem>? _currentEvents;
     private ImmutableList<EntityEventItem>? _currentAsyncEvents;
 
-    public EventRunnerHook(EventHandlerFinder eventHandlerFinder, IEnumerable<IEventMapper> autoMappers)
+    public EventRunnerHook(EventHandlerFinder eventHandlerFinder, IEnumerable<IObjectMapper> autoMappers)
     {
         _eventHandlerFinder = eventHandlerFinder;
         _autoMapper = autoMappers.FirstOrDefault();
@@ -123,7 +123,7 @@ internal sealed class EventRunnerHook : /*IHook,*/ IHookAsync
 
                 if (finallyEventTypes.Any())
                 {
-                    if (_autoMapper == null) throw new NoNullAllowedException($"The {nameof(IEventMapper)} is not provided.");
+                    if (_autoMapper == null) throw new NoNullAllowedException($"The {nameof(IObjectMapper)} is not provided.");
                     events.AddRange(finallyEventTypes.Distinct().Select(d=>(IEventItem)_autoMapper.Map(entity, e.Entry.Metadata.ClrType, d)));
                 }
 

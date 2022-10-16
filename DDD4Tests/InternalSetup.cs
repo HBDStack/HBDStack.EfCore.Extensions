@@ -3,6 +3,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using AutoMapper;
 using HBDStack.EfCore.Hooks;
+using HBDStack.ObjectMapper.AutoMapper;
 using Microsoft.EntityFrameworkCore;
 
 // ReSharper disable MemberCanBePrivate.Global
@@ -103,8 +104,7 @@ public static class InternalSetup
         {
             //Auto Mapper
             autoMapperConfig ??= cf => cf.ShouldUseConstructor = f => f.IsPublic;
-            service.AddAutoMapper(autoMapperConfig, assembliesToScans);
-            service.AddEventAutoMapper();
+            service.AddAutoObjectMapper(autoMapperConfig, assembliesToScans);
         }
 
         return service.AddBoundedContext<TContext>(contextBuilder,

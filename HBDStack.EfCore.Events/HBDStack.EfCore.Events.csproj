@@ -30,6 +30,7 @@
         <InternalsVisibleTo Include="HBDStack.EfCore.Events.Tests" />
     </ItemGroup>
     <ItemGroup>
+      <PackageReference Include="HBDStack.ObjectMapper.Abstraction" Version="1.0.1" />
       <PackageReference Include="HBDStack.StatusGeneric" Version="6.5.6" />
     </ItemGroup>
 
