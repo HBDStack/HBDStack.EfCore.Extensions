@@ -81,14 +81,11 @@ internal sealed class EventRunnerHook : /*IHook,*/ IHookAsync
             if (status.HasErrors) throw new EventException(status);
         } while (scanCount < MAX_SCAN_EVENTS_COUNT);
 
-        if (scanCount == MAX_SCAN_EVENTS_COUNT)
-        {
-            throw new OverflowException(
-                $"Overflow maximum {MAX_SCAN_EVENTS_COUNT} " +
-                "loop check for run domain event handler. " +
-                "So many domain events handler which continue adding new event " +
-                "which to be considering a code smell");
-        }
+        throw new OverflowException(
+            $"Overflow maximum {MAX_SCAN_EVENTS_COUNT} " +
+            "loop check for run domain event handler. " +
+            "So many domain events handler which continue adding new event " +
+            "which to be considering a code smell");
     }
 
     /// <summary>
