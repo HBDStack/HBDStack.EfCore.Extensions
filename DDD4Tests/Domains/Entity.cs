@@ -38,4 +38,9 @@ public class Entity : DomainEntity
             Name = Name
         });
     }
+
+    public void DoLoop()
+    {
+        AddEvent(new EntityLoopEvent());
+    }
 }

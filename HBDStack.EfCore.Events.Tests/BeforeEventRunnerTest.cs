@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using DDD4Tests.Domains;
@@ -60,5 +61,21 @@ public class BeforeEventRunnerTest : IClassFixture<EventRunnerFixture>
         await a.Should().ThrowAsync<EventException>().ConfigureAwait(false);
 
         BeforeAddedEventTestHandler.ReturnFailureResult = false;
+    }
+
+    [Fact]
+    public async Task AddEntity_BeforeEventAsync_Failed()
+    {
+        BeforeAddedEventTestHandler.ReturnFailureResult = false;
+
+        var root = await _provider.Context.Set<Root>().FirstAsync().ConfigureAwait(false);
+
+        root.AddEntity("Dragon");
+        var entity = root.Entities.FirstOrDefault();
+        entity?.DoLoop();
+
+        var exception = await Assert.ThrowsAsync<OverflowException>(async () =>
+            await _provider.Context.SaveChangesAsync().ConfigureAwait(false));
+        exception.Message.Should().StartWith("Overflow maximum 5 loop check for run domain event handler.");
     }
 }
