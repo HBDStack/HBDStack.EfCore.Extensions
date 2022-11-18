@@ -6,9 +6,9 @@ using HBDStack.StatusGeneric;
 
 namespace DDD4Tests.Events;
 
-internal sealed class AfterEventTestHandler : IAfterSaveEventHandlerAsync<EntityAddedEvent>
+internal sealed class AfterAddedEventTestHandler : IAfterSaveEventHandlerAsync<EntityAddedEvent>
 {
-    public AfterEventTestHandler() => AsyncCalled = 0;
+    public AfterAddedEventTestHandler() => AsyncCalled = 0;
 
     public static bool ReturnFailureResult { get; set; }
     public static int AsyncCalled { get; set; }

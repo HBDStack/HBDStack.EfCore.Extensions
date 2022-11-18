@@ -27,7 +27,7 @@ public class EvenPublisherFixture : IDisposable
         Context.Set<Root>()
             .AddRange(new Root("Duy"), new Root("Steven"), new Root("Hoang"), new Root("HBD"));
 
-        BeforeEventTestHandler.ReturnFailureResult = false;
+        BeforeAddedEventTestHandler.ReturnFailureResult = false;
         Context.SaveChangesAsync().GetAwaiter().GetResult();
     }
 

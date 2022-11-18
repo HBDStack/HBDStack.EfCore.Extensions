@@ -17,15 +17,15 @@ public class AfterEventRunnerTest : IClassFixture<AfterEventRunnerFixture>
     [Fact]
     public async Task AddEntity_Event_ShouldRaised()
     {
-        AfterEventTestHandler.ReturnFailureResult = false;
-        AfterEventTestHandler.AsyncCalled = 0;
+        AfterAddedEventTestHandler.ReturnFailureResult = false;
+        AfterAddedEventTestHandler.AsyncCalled = 0;
             
         var root =await _provider.Context.Set<Root>().FirstAsync().ConfigureAwait(false);
 
         root.AddEntity("Duy");
         await _provider.Context.SaveChangesAsync().ConfigureAwait(false);
             
-        AfterEventTestHandler.AsyncCalled.Should().BeGreaterOrEqualTo(1);
+        AfterAddedEventTestHandler.AsyncCalled.Should().BeGreaterOrEqualTo(1);
     }
 
     [Fact]
@@ -35,11 +35,11 @@ public class AfterEventRunnerTest : IClassFixture<AfterEventRunnerFixture>
 
         root.AddEntity("Steven");
             
-        AfterEventTestHandler.ReturnFailureResult = true;
+        AfterAddedEventTestHandler.ReturnFailureResult = true;
 
         Action a = () => _provider.Context.SaveChangesAsync().ConfigureAwait(false);
         a.Should().NotThrow();
 
-        AfterEventTestHandler.ReturnFailureResult = false;
+        AfterAddedEventTestHandler.ReturnFailureResult = false;
     }
 }
