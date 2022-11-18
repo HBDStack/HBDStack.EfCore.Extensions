@@ -17,23 +17,23 @@ public class BeforeEventRunnerTest : IClassFixture<EventRunnerFixture>
     [Fact]
     public async Task AddEntity_BeforeEvent_ShouldRaised()
     {
-        BeforeEventTestHandler.ReturnFailureResult = false;
-        BeforeEventTestHandler.AsyncCalled = false;
+        BeforeAddedEventTestHandler.ReturnFailureResult = false;
+        BeforeAddedEventTestHandler.AsyncCalled = false;
         //BeforeEventTestHandler.Called = false;
-            
+
         var root = _provider.Context.Set<Root>().FirstOrDefault();
 
         root.AddEntity("Steven");
-       await _provider.Context.SaveChangesAsync().ConfigureAwait(false);
-            
+        await _provider.Context.SaveChangesAsync().ConfigureAwait(false);
+
         //BeforeEventTestHandler.Called.Should().BeTrue();
-        BeforeEventTestHandler.AsyncCalled.Should().BeTrue();
+        BeforeAddedEventTestHandler.AsyncCalled.Should().BeTrue();
     }
 
     [Fact]
     public async Task AddEntity_BeforeEventAsync_ShouldRaised()
     {
-        BeforeEventTestHandler.ReturnFailureResult = false;
+        BeforeAddedEventTestHandler.ReturnFailureResult = false;
 
         var root = await _provider.Context.Set<Root>().FirstAsync().ConfigureAwait(false);
 
@@ -41,8 +41,10 @@ public class BeforeEventRunnerTest : IClassFixture<EventRunnerFixture>
 
         await _provider.Context.SaveChangesAsync().ConfigureAwait(false);
 
-        BeforeEventTestHandler.Called.Should().BeFalse();
-        BeforeEventTestHandler.AsyncCalled.Should().BeTrue();
+        BeforeAddedEventTestHandler.Called.Should().BeFalse();
+        BeforeAddedEventTestHandler.AsyncCalled.Should().BeTrue();
+        BeforeUpdatedEventTestHandler.ProceedHandlers.Should().ContainSingle();
+        BeforeUpdatedEventTestHandler.ProceedHandlers.Should().Contain($"Entity{root.Entities.FirstOrDefault()?.Id}");
     }
 
     [Fact]
@@ -52,11 +54,11 @@ public class BeforeEventRunnerTest : IClassFixture<EventRunnerFixture>
 
         root.AddEntity("Steven");
 
-        BeforeEventTestHandler.ReturnFailureResult = true;
-            
-        var a = () => _provider.Context.SaveChangesAsync();
-       await a.Should().ThrowAsync<EventException>().ConfigureAwait(false);
+        BeforeAddedEventTestHandler.ReturnFailureResult = true;
 
-        BeforeEventTestHandler.ReturnFailureResult = false;
+        var a = () => _provider.Context.SaveChangesAsync();
+        await a.Should().ThrowAsync<EventException>().ConfigureAwait(false);
+
+        BeforeAddedEventTestHandler.ReturnFailureResult = false;
     }
 }

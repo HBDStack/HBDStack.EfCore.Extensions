@@ -1,15 +1,16 @@
 using System.Threading;
 using System.Threading.Tasks;
+using DDD4Tests.Domains;
 using HBDStack.EfCore.Abstractions.Events;
 using HBDStack.EfCore.Events.Handlers;
 using HBDStack.StatusGeneric;
 
 namespace DDD4Tests.Events;
 
-internal class BeforeEventTestHandler : /*IBeforeSaveEventHandler<EntityAddedEvent>,*/
+internal class BeforeAddedEventTestHandler : /*IBeforeSaveEventHandler<EntityAddedEvent>,*/
     IBeforeSaveEventHandlerAsync<EntityAddedEvent>
 {
-    public BeforeEventTestHandler()
+    public BeforeAddedEventTestHandler()
     {
         Called = false;
         AsyncCalled = false;
@@ -34,6 +35,11 @@ internal class BeforeEventTestHandler : /*IBeforeSaveEventHandler<EntityAddedEve
     public ValueTask<IStatusGeneric> HandleAsync(IEventEntity callingEntity, EntityAddedEvent domainEvent,
         CancellationToken cancellationToken = default)
     {
+        if (callingEntity is Entity entity)
+        {
+            entity.Rename("Long");
+        }
+        
         var status = new StatusGenericHandler();
         if (ReturnFailureResult)
             status.AddError("Some Error Here");

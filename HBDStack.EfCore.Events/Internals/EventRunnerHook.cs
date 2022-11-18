@@ -12,10 +12,14 @@ namespace HBDStack.EfCore.Events.Internals;
 
 internal sealed class EventRunnerHook : /*IHook,*/ IHookAsync
 {
+    private const int MAX_SCAN_EVENTS_COUNT = 5;
+
     //private static readonly Type InternalRunner = typeof(EventHandlerRunner<>);
     private static readonly Type InternalAsyncRunner = typeof(EventHandlerRunnerAsync<>);
     private readonly EventHandlerFinder _eventHandlerFinder;
+
     private readonly IObjectMapper? _autoMapper;
+
     //private ImmutableList<EntityEventItem>? _currentEvents;
     private ImmutableList<EntityEventItem>? _currentAsyncEvents;
 
@@ -58,12 +62,33 @@ internal sealed class EventRunnerHook : /*IHook,*/ IHookAsync
     public async Task RunBeforeSaveAsync(SnapshotContext context,
         CancellationToken cancellationToken = default)
     {
-        _currentAsyncEvents = ProcessAndFilterDomainEvents(context);
+        _currentAsyncEvents = ImmutableList<EntityEventItem>.Empty;
 
-        //Run Before Events
-        var status = await RunEventsAsync(HandlerTypes.BeforeAsync, _currentAsyncEvents, cancellationToken)
-            .ConfigureAwait(false);
-        if (status.HasErrors) throw new EventException(status);
+        var scanCount = 0;
+        do
+        {
+            var processingEvents = ProcessAndFilterDomainEvents(context, scanCount == 0);
+            scanCount++;
+
+            if (processingEvents.IsEmpty)
+                return;
+
+            _currentAsyncEvents = _currentAsyncEvents.AddRange(processingEvents);
+
+            //Run Before Events
+            var status = await RunEventsAsync(HandlerTypes.BeforeAsync, processingEvents, cancellationToken)
+                .ConfigureAwait(false);
+            if (status.HasErrors) throw new EventException(status);
+        } while (scanCount < MAX_SCAN_EVENTS_COUNT);
+
+        if (scanCount == MAX_SCAN_EVENTS_COUNT)
+        {
+            throw new OverflowException(
+                $"Overflow maximum {MAX_SCAN_EVENTS_COUNT} " +
+                "loop check for run domain event handler. " +
+                "So many domain events handler which continue adding new event " +
+                "which to be considering a code smell");
+        }
     }
 
     /// <summary>
@@ -90,7 +115,8 @@ internal sealed class EventRunnerHook : /*IHook,*/ IHookAsync
         return Activator.CreateInstance(handlerType.MakeGenericType(info.Event.GetType()), info);
     }
 
-    private ImmutableList<EntityEventItem> ProcessAndFilterDomainEvents(SnapshotContext context)
+    private ImmutableList<EntityEventItem> ProcessAndFilterDomainEvents(SnapshotContext context,
+        bool scanAutoEvents = true)
     {
         var found = context.SnapshotEntities.Where(e => e.Entity is IEventEntity)
             .Select(e =>
@@ -109,25 +135,30 @@ internal sealed class EventRunnerHook : /*IHook,*/ IHookAsync
                 if (eventsAndTypes.eventTypes != null)
                     finallyEventTypes.AddRange(eventsAndTypes.eventTypes);
 
-                //Collect Auto events from Attribute.
-                var autoEventAtt = e.Entry.Metadata.ClrType.GetCustomAttribute<AutoEventsAttribute>();
+                if (scanAutoEvents)
+                {
+                    //Collect Auto events from Attribute.
+                    var autoEventAtt = e.Entry.Metadata.ClrType.GetCustomAttribute<AutoEventsAttribute>();
 
-                if(autoEventAtt?.CreatedEventType != null && e.OriginalState == EntityState.Added)
-                    finallyEventTypes.Add(autoEventAtt.CreatedEventType);
-                
-                if(autoEventAtt?.UpdatedEventType != null && e.OriginalState == EntityState.Modified)
-                    finallyEventTypes.Add(autoEventAtt.UpdatedEventType);
+                    if (autoEventAtt?.CreatedEventType != null && e.OriginalState == EntityState.Added)
+                        finallyEventTypes.Add(autoEventAtt.CreatedEventType);
 
-                if(autoEventAtt?.DeletedEventType != null && e.OriginalState == EntityState.Deleted)
-                    finallyEventTypes.Add(autoEventAtt.DeletedEventType);
+                    if (autoEventAtt?.UpdatedEventType != null && e.OriginalState == EntityState.Modified)
+                        finallyEventTypes.Add(autoEventAtt.UpdatedEventType);
+
+                    if (autoEventAtt?.DeletedEventType != null && e.OriginalState == EntityState.Deleted)
+                        finallyEventTypes.Add(autoEventAtt.DeletedEventType);
+                }
 
                 if (finallyEventTypes.Any())
                 {
-                    if (_autoMapper == null) throw new NoNullAllowedException($"The {nameof(IObjectMapper)} is not provided.");
-                    events.AddRange(finallyEventTypes.Distinct().Select(d=>(IEventItem)_autoMapper.Map(entity, e.Entry.Metadata.ClrType, d)));
+                    if (_autoMapper == null)
+                        throw new NoNullAllowedException($"The {nameof(IObjectMapper)} is not provided.");
+                    events.AddRange(finallyEventTypes.Distinct()
+                        .Select(d => (IEventItem)_autoMapper.Map(entity, e.Entry.Metadata.ClrType, d)));
                 }
 
-                return new EntityEventItem(entity, events.Where(i=>i is not null).Distinct().ToArray()!);
+                return new EntityEventItem(entity, events.Where(i => i is not null).Distinct().ToArray()!);
             })
             .Where(e => e.Events.Count > 0)
             .ToImmutableList();
@@ -155,7 +186,8 @@ internal sealed class EventRunnerHook : /*IHook,*/ IHookAsync
     //     return new StatusGenericHandler();
     // }
 
-    private async ValueTask<IStatusGeneric> RunEventsAsync(HandlerTypes type, ImmutableList<EntityEventItem>? events, CancellationToken cancellationToken = default)
+    private async ValueTask<IStatusGeneric> RunEventsAsync(HandlerTypes type, ImmutableList<EntityEventItem>? events,
+        CancellationToken cancellationToken = default)
     {
         if (events == null || events.IsEmpty) return new StatusGenericHandler();
         var foundHandlers = @events.SelectMany(e => _eventHandlerFinder.Find(type, e));

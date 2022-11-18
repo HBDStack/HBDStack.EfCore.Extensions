@@ -18,7 +18,7 @@ public class AfterEventRunnerFixture : IDisposable
                 enableAutoMapper:true,
                 enableAutoScanEventHandler: false)
             //If you disable the scan the Hook and Even runner wont be added by default.
-            .AddSingleton<IAfterSaveEventHandlerAsync<EntityAddedEvent>, AfterEventTestHandler>()
+            .AddSingleton<IAfterSaveEventHandlerAsync<EntityAddedEvent>, AfterAddedEventTestHandler>()
             //You need to add it manually
             .AddEventRunner()
             .BuildServiceProvider();

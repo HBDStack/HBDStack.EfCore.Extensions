@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using DDD4Tests.Abstracts;
@@ -12,7 +13,7 @@ public class Root : AggregateRoot
 {
     private readonly HashSet<Entity> _entities;
 
-    public Root(string name) : base(default, "Unit Test")
+    public Root(string name) : base(default, $"Unit Test {Guid.NewGuid()}")
     {
         Name = name;
         _entities = new HashSet<Entity>();
@@ -29,7 +30,5 @@ public class Root : AggregateRoot
     {
         var entity = new Entity(name, Id);
         _entities.Add(entity);
-
-        AddEvent(new EntityAddedEvent {Id = entity.Id, Name = name});
     }
 }
