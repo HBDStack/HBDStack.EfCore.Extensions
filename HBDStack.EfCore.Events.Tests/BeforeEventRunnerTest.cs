@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using DDD4Tests.Domains;
+using DDD4Tests.Domains.University;
 using DDD4Tests.Events;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
@@ -77,5 +78,12 @@ public class BeforeEventRunnerTest : IClassFixture<EventRunnerFixture>
         var exception = await Assert.ThrowsAsync<OverflowException>(async () =>
             await _provider.Context.SaveChangesAsync().ConfigureAwait(false));
         exception.Message.Should().StartWith("Overflow maximum 5 loop check for run domain event handler.");
+    }
+
+    [Fact]
+    public async Task AddCourse_CallOtherEvent_BeforeEventAsync_ShouldRaised()
+    {
+        await _provider.Context.AddAsync(new Course("Become master of DDD"));
+        await _provider.Context.SaveChangesAsync().ConfigureAwait(false);
     }
 }
