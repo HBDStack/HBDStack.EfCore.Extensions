@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace HBDStack.EfCore.Hooks.Internals;
@@ -11,10 +12,12 @@ public enum RunningTypes
 internal sealed class HookRunner : ISaveChangesInterceptor
 {
     private readonly IEnumerable<IAfterSaveHookAsync> _afterSaveHookAsync;
+
     //private readonly IEnumerable<IAfterSaveHook> _afterSaveHooks;
     private readonly IEnumerable<IBeforeSaveHookAsync> _beforeSaveHookAsync;
-    //private readonly IEnumerable<IBeforeSaveHook> _beforeSaveHooks;
 
+    //private readonly IEnumerable<IBeforeSaveHook> _beforeSaveHooks;
+    private readonly ConcurrentQueue<string> _callersQueue = new();
     private SnapshotContext? _dataProvider;
 
     public HookRunner(
@@ -44,16 +47,17 @@ internal sealed class HookRunner : ISaveChangesInterceptor
     //             h.RunAfterSave(context);
     // }
 
-    private async Task RunHooksAsync(RunningTypes type, SnapshotContext context, CancellationToken cancellationToken = default)
+    private async Task RunHooksAsync(RunningTypes type, SnapshotContext context,
+        CancellationToken cancellationToken = default)
     {
-        if(context==null)throw new ArgumentNullException(nameof(context));
- 
+        if (context == null) throw new ArgumentNullException(nameof(context));
+
         //Run Hooks Async
         if (type == RunningTypes.BeforeSave)
-            foreach (var h in _beforeSaveHookAsync.Where(h=>!context.DbContext!.IsHookDisabled(h)))
+            foreach (var h in _beforeSaveHookAsync.Where(h => !context.DbContext!.IsHookDisabled(h)))
                 await h.RunBeforeSaveAsync(context, cancellationToken).ConfigureAwait(false);
         else
-            foreach (var h in _afterSaveHookAsync.Where(h=>!context.DbContext!.IsHookDisabled(h)))
+            foreach (var h in _afterSaveHookAsync.Where(h => !context.DbContext!.IsHookDisabled(h)))
                 await h.RunAfterSaveAsync(context, cancellationToken).ConfigureAwait(false);
     }
 
@@ -85,19 +89,21 @@ internal sealed class HookRunner : ISaveChangesInterceptor
     //
     //     return result;
     // }
-    
+
     public InterceptionResult<int> SavingChanges(DbContextEventData eventData, InterceptionResult<int> result)
         => throw new NotSupportedException($"Please use {nameof(SavingChangesAsync)} version");
-    
-    public int SavedChanges(SaveChangesCompletedEventData eventData, int result) 
+
+    public int SavedChanges(SaveChangesCompletedEventData eventData, int result)
         => throw new NotSupportedException($"Please use {nameof(SavingChangesAsync)} version");
 
     #endregion
 
     #region Save Changes Async
 
-    public async ValueTask<InterceptionResult<int>> SavingChangesAsync(DbContextEventData eventData, InterceptionResult<int> result, CancellationToken cancellationToken = default)
+    public async ValueTask<InterceptionResult<int>> SavingChangesAsync(DbContextEventData eventData,
+        InterceptionResult<int> result, CancellationToken cancellationToken = default)
     {
+        _callersQueue.Enqueue(eventData.EventIdCode);
         _dataProvider = new SnapshotContext(eventData.Context!);
 
         //Run Before Save
@@ -109,6 +115,7 @@ internal sealed class HookRunner : ISaveChangesInterceptor
     public async ValueTask<int> SavedChangesAsync(SaveChangesCompletedEventData eventData, int result,
         CancellationToken cancellationToken = default)
     {
+        _callersQueue.TryDequeue(out _);
         try
         {
             //Run After Events and ignore the result even failed.
@@ -116,8 +123,11 @@ internal sealed class HookRunner : ISaveChangesInterceptor
         }
         finally
         {
-            _dataProvider?.Dispose();
-            _dataProvider = null;
+            if (_callersQueue.IsEmpty)
+            {
+                _dataProvider?.Dispose();
+                _dataProvider = null;
+            }
         }
 
         return result;
@@ -131,7 +141,8 @@ internal sealed class HookRunner : ISaveChangesInterceptor
     {
     }
 
-    public Task SaveChangesFailedAsync(DbContextErrorEventData eventData, CancellationToken cancellationToken = default) => Task.CompletedTask;
+    public Task SaveChangesFailedAsync(DbContextErrorEventData eventData,
+        CancellationToken cancellationToken = default) => Task.CompletedTask;
 
     #endregion
 }
