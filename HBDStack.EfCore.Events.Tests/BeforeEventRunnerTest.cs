@@ -83,7 +83,17 @@ public class BeforeEventRunnerTest : IClassFixture<EventRunnerFixture>
     [Fact]
     public async Task AddCourse_CallOtherEvent_BeforeEventAsync_ShouldRaised()
     {
-        await _provider.Context.AddAsync(new Course("Become master of DDD"));
+        var course = await _provider.Context.AddAsync(new Course("Become master of DDD"));
         await _provider.Context.SaveChangesAsync().ConfigureAwait(false);
+        _provider.Context.ChangeTracker.Clear();
+
+        await _provider.Context.AddAsync(new Student(new Guid("caa9c4e0-60d0-42e5-9130-642294e56acb"), "Dragon",
+            course.Entity.Id));
+        await _provider.Context.SaveChangesAsync().ConfigureAwait(false);
+
+        BeforeStudentAddedEventHandler.ProceedHandlers.Should()
+            .Contain($"{nameof(StudentAddedEvent)}caa9c4e0-60d0-42e5-9130-642294e56acb");
+        BeforeCourseStartedEventHandler.ProceedHandlers.Should().Contain(nameof(CourseStartedEvent));
+        BeforeCourseStatusChangedEventHandler.ProceedHandlers.Should().Contain(nameof(CourseStatusChangedEvent));
     }
 }
