@@ -5,11 +5,19 @@ namespace DDD4Tests.Domains.University;
 
 public class Course : AggregateRoot
 {
-    public string Name { get; private set; }
-
     public Course(string name) : base(default, "Unit test")
     {
         Name = name;
-        AddEvent(new CourseAddedEvent());
+    }
+
+    public string Name { get; private set; }
+
+    public string Status { get; private set; }
+
+    public void Start()
+    {
+        Status = "Started";
+        AddEvent(new CourseStartedEvent());
+        AddEvent(new CourseStatusChangedEvent());
     }
 }

@@ -2,6 +2,6 @@
 
 namespace DDD4Tests.Events;
 
-public class CourseAddedEvent : IEventItem
+public class CourseStatusChangedEvent : IEventItem
 {
 }
