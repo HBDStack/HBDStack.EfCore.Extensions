@@ -96,7 +96,7 @@ internal sealed class EventRunnerHook : /*IHook,*/ IHookAsync
     public async Task RunAfterSaveAsync(SnapshotContext context, CancellationToken cancellationToken = default)
     {
         await RunEventsAsync(HandlerTypes.AfterAsync, _currentAsyncEvents, cancellationToken).ConfigureAwait(false);
-        _currentAsyncEvents = null;
+        _currentAsyncEvents = ImmutableList<EntityEventItem>.Empty;
     }
 
     /// <summary>
