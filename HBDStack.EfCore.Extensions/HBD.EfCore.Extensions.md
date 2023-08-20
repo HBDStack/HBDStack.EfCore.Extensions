@@ -8,14 +8,12 @@ PM> Install-Package HBD.EfCore.Extensions
 
 ## Quick Startup
 
-1.  Change inherited of your DbContext from
-    `Microsoft.EfCore.DbContext` to
-    `HBD.EfCore.Extensions.DbContext`.
+1.  Define your entities. 
 
-2.  Implement your `EntityTypeConfiguration<TEntity>` by following the
+2. Implement your `EntityTypeConfiguration<TEntity>` by following the
     instruction below.
 
-3.  Add Configuration to your Startup class.
+3. Add Configuration to your Startup class.
 
 ## Introduction
 
@@ -189,7 +187,7 @@ By doing that you might face a few common problems below:
     and In-memory entities.
 
 To resolve the above problems, I would like to share Specification
-implementation for DDD entities as below.​
+implementation for DDD entities as below.
 
 ### I. Spec generic abstract class
 
@@ -277,97 +275,6 @@ new one instead just call the `NotMe` method:
     //Combine 2 sepc: Active Users AND LoginName != "Duy"
     var users = dbContext.ForSpec(activeSpec.ButNot(loginNameIsDuy)).ToList();
 ```
-
-## Ordering Builder
-
-## Lifecycle Hooks Handling
-
-There are a few interfaces had added that allow entity aware when it is saved to
-Db.
-
-**1. `ISavingAwareness` interface**
-
-By Implement this interface to an Entity, the method `OnSaving` will be called
-right before the entity being saved to Db. The use case of this feature allows
-you to perform all calculation for all computed properties in one place. This
-method will be called before the validation.
-
-**Use-case 1**: Calculate Age of User when Birthday set
-
-```csharp
-public class User: BaseEntity, ISavingAwareness
-{
-    #region Public Properties
-    public DateTime? Birthday {get;set;}
-    public int Age {get;private set;}
-     ...
-    #endregion Public Properties
-
-    public void OnSaving(EntityState state, DbContext dbContext)
-    {
-        if(state == EntityState.Delete || BirthDay == null)
-        {
-            //Do some other validation for deleting.
-            return;
-        }
-
-        //Calculate Age for Insert and Update
-        var today = DateTime.Today;
-        // Calculate the age.
-        var age = today.Year - Birthday.Value.Year;
-        // Go back to the year the person was born in case of a leap year
-        if (Birthday > today.AddYears(-age))
-            age--;
-        //Assgin the value to Property
-        Age = age;
-    }
-}
-```
-
-**Use-case 2:** Re-Calculate only when property got changed.
-
-In use case 1 the Age property got updated whenever User got changed even
-Birthday is not changed. If the calculation property depends on navigation
-properties the calculation may wrong as the data of the navigation
-properties were not loaded propriety.
-
-In this use case, I would like to propose the other way to calculate the computed
-the property when the related got changed.
-
-Let review the `Payments` and `TotalPayment` of the User as below.
-
-```c#
- public class User: ISavingAwareness
- {
-        public virtual HashSet<Payment> Payments { get; private set; }
-
-          [Column(TypeName = "Money")]
-        public decimal TotalPayment { get; private set; }
-
-        public void OnSaving(EntityState state, DbContext dbContext)
-        {
-            if (state == EntityState.Deleted) return;
-
-            if (dbContext.Entry(this).HasChangeOn(i => i.Payments))
-            {
-                TotalPayment = Payments.Any() ? Payments.Sum(i => i.Amount) : 0;
-            }
-        }
-  }
-```
-
-The Total payment property got re-calculated whenever Payments collection has changed. However, we need to ensure the Payments is loaded along with User when making changes. **If not the total amount won't be calculated.**
-
-```c#
- var user = Db.Set<User>().Include(u => u.Payments).Last();
-
- //Update user Payment
- user.Payments.Add(new Payment { Amount = 100 });
- //Save changes
- await Db.SaveChangesAsync();
-```
-
-> **Instead of loading all the navigation properties for every Biz action, you should use Spec<T> to load required navigation properties based on the need of the Biz action in order to improve the performance of the application.**
 
 ## Recommendation
 
