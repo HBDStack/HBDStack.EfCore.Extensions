@@ -48,7 +48,7 @@ internal class EntityMappingExtension : IDbContextOptionsExtension, IEntityMappi
         //Register Global Query Filter from registration, it should be
         foreach (var g in SetupEfCore.GlobalQueryFilters)
             services.Add(
-                new ServiceDescriptor(typeof(IGlobalModelBuilderRegister), g, ServiceLifetime.Scoped));
+                new ServiceDescriptor(typeof(IGlobalModelBuilderRegister), g, ServiceLifetime.Singleton));
     }
 
     /// <summary>

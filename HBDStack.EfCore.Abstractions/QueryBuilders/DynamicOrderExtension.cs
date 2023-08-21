@@ -1,5 +1,6 @@
 ﻿using System.Linq.Expressions;
 using System.Reflection;
+
 #pragma warning disable CS8625
 
 namespace HBDStack.EfCore.Abstractions.QueryBuilders;
@@ -25,7 +26,7 @@ public static class DynamicOrderExtension
     public static IOrderedQueryable<T> OrderByDescendingDynamic<T>(this IQueryable<T> source, string property) =>
         ApplyOrder(source, property, DynamicOrderMethods.OrderByDescending);
 
-    
+
     public static IOrderedQueryable<T> OrderByDynamic<T>(this IQueryable<T> source, IEnumerable<string> properties) =>
         properties.Aggregate<string, IOrderedQueryable<T>>(null,
             (current, p) => current == null ? source.OrderByDynamic(p) : current.ThenByDynamic(p));
@@ -40,9 +41,10 @@ public static class DynamicOrderExtension
     /// <param name="orders"></param>
     /// <typeparam name="T"></typeparam>
     /// <returns></returns>
-    public static IOrderedQueryable<T>? OrderByDynamics<T>(this IQueryable<T> source, params DynamicOrderInfo[] orders)
+    public static IOrderedQueryable<T> OrderByDynamics<T>(this IQueryable<T> source, params DynamicOrderInfo[] orders)
     {
         IOrderedQueryable<T>? result = null;
+
         foreach (var (property, orderingDirection) in orders)
         {
             if (result == null)
@@ -50,9 +52,11 @@ public static class DynamicOrderExtension
                 result = source.OrderByDynamic(property, orderingDirection);
                 continue;
             }
+
             result = result.ThenByDynamic(property, orderingDirection);
         }
 
+        ArgumentNullException.ThrowIfNull(result);
         return result;
     }
 
@@ -71,7 +75,8 @@ public static class DynamicOrderExtension
     public static IOrderedQueryable<T> ThenByDynamic<T>(this IOrderedQueryable<T> source, string property) =>
         ApplyOrder(source, property, DynamicOrderMethods.ThenBy);
 
-    private static IOrderedQueryable<T> ApplyOrder<T>(IQueryable<T> source, string property, DynamicOrderMethods methodName)
+    private static IOrderedQueryable<T> ApplyOrder<T>(IQueryable<T> source, string property,
+        DynamicOrderMethods methodName)
     {
         if (property == null) throw new ArgumentNullException(nameof(property));
         var mName = methodName.ToString();
@@ -104,6 +109,7 @@ public static class DynamicOrderExtension
             .MakeGenericMethod(typeof(T), type)
             .Invoke(null, new object[] { source, lambda });
 
-        return (IOrderedQueryable<T>)result!;
+        ArgumentNullException.ThrowIfNull(result);
+        return (IOrderedQueryable<T>)result;
     }
 }

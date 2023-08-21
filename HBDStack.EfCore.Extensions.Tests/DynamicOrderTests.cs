@@ -15,7 +15,7 @@ public class DynamicOrderTests
     {
         var result = await UnitTestSetup.Db.Set<User>()
             .AsQueryable()
-            .OrderByDynamics(new DynamicOrderInfo("FirstName",OrderingDirection.Asc),new DynamicOrderInfo("Account.UserName",OrderingDirection.Asc))
+            .OrderByDynamics(new DynamicOrderInfo("FirstName",OrderingDirection.Asc),new DynamicOrderInfo("Account.UserName",OrderingDirection.Desc))
             .ToListAsync();
     }
 }
