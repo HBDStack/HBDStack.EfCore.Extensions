@@ -80,7 +80,8 @@ public static class EfCoreExtensions
 
         await dbContext.Database.OpenConnectionAsync().ConfigureAwait(false);
         await using var result = await command.ExecuteReaderAsync().ConfigureAwait(false);
-            
+        await dbContext.Database.CloseConnectionAsync();
+        
         if (await result.ReadAsync().ConfigureAwait(false))
             return result.GetFieldValue<object>(0);
 
