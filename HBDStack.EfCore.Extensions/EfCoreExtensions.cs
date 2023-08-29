@@ -1,6 +1,7 @@
 ﻿using HBDStack.EfCore.Abstractions.Attributes;
 using HBDStack.EfCore.Extensions;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+
 // ReSharper disable MemberCanBePrivate.Global
 
 // ReSharper disable CheckNamespace
@@ -56,7 +57,7 @@ public static class EfCoreExtensions
     public static async ValueTask<TValue?> NextSeqValue<TEnum, TValue>(this DbContext dbContext, TEnum name)
         where TEnum : struct
         where TValue : struct =>
-        (TValue?) await dbContext.NextSeqValue(name).ConfigureAwait(false);
+        (TValue?)await dbContext.NextSeqValue(name).ConfigureAwait(false);
 
     /// <summary>
     ///     Get Next Sequence value
@@ -74,18 +75,21 @@ public static class EfCoreExtensions
         var type = typeof(TEnum);
         var att = SequenceRegistration.GetAttribute(type);
         if (att == null) return null;
-        
+
         await using var command = dbContext.Database.GetDbConnection().CreateCommand();
         command.CommandText = $"SELECT NEXT VALUE FOR {att.Schema}.{SequenceRegistration.GetSequenceName(name)}";
 
         await dbContext.Database.OpenConnectionAsync().ConfigureAwait(false);
         await using var result = await command.ExecuteReaderAsync().ConfigureAwait(false);
-        await dbContext.Database.CloseConnectionAsync();
         
+        object? rs = null;
         if (await result.ReadAsync().ConfigureAwait(false))
-            return result.GetFieldValue<object>(0);
+            rs = result.GetFieldValue<object>(0);
 
-        throw new InvalidOperationException(type.ToString());
+        await dbContext.Database.CloseConnectionAsync();
+        if (rs == null)
+            throw new InvalidOperationException(type.ToString());
+        return rs;
     }
 
     /// <summary>
@@ -106,11 +110,11 @@ public static class EfCoreExtensions
         var f = att.FormatString.Replace(nameof(DateTime), "0", StringComparison.OrdinalIgnoreCase);
         return string.Format(f, DateTime.Now, value);
     }
-    
-    internal static Type GetEntityType(Type entityMappingType) 
+
+    internal static Type GetEntityType(Type entityMappingType)
         => entityMappingType.GetInterfaces().First(a => a.IsGenericType).GetGenericArguments().First();
 
-    internal static bool IsSequenceSupported(this DatabaseFacade database) 
+    internal static bool IsSequenceSupported(this DatabaseFacade database)
         => database.ProviderName == "Microsoft.EntityFrameworkCore.SqlServer";
 
     #endregion Methods
