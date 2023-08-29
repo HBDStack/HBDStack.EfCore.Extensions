@@ -27,6 +27,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\DDD4Tests\DDD4Tests.csproj" />
+      <ProjectReference Include="..\HBDStack.EfCore.Repos\HBDStack.EfCore.Repos.csproj" />
       <ProjectReference Include="..\HBDStack.TestHelper\HBDStack.TestHelper.csproj" />
       <ProjectReference Include="..\HBD.EfCore.Repositories\HBDStack.EfCore.Repos.csproj" />
     </ItemGroup>

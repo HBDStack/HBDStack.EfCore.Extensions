@@ -6,6 +6,7 @@ on:
       - '**'
 
 jobs:
+  ## Only build nuget package and release to Nuget.org when running on main branch
   dotnet_pack_release_job:
     uses: HBDStack/ShareWorkflows/.github/workflows/dotnet-package-release.yml@main
     with:
